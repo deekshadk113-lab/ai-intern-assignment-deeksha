@@ -1,9 +1,9 @@
 # AI Intern Assignment — HSA Team
 
-**Name:** Deeksha
-**Email:** [YOUR_EMAIL_HERE]
-**Date of submission:** [SUBMISSION_DATE_HERE]
-**USN:** 1DT23CS050
+**Name:** Deeksha D K
+**Email:** deekshadk113@gmail.com
+**Date of submission:** 12-09-2026
+
 
 ---
 
