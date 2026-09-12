@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study Abroad Lead Form &mdash; Live Webhook</title>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --navy-deep:#122036;
+    --paper:#F7F5EF;
+    --ink:#1F2320;
+    --ink-soft:#5B6169;
+    --gold:#B8912E;
+    --error:#A6382C;
+    --success:#2F6B4F;
+    --rule:#D8D2C2;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Palatino Linotype',Georgia,'Times New Roman',serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:48px 20px 80px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  .masthead{border-bottom:2px solid var(--navy);padding-bottom:20px;margin-bottom:36px;}
+  .masthead .kicker{font-family:Georgia,serif;font-style:italic;color:var(--ink-soft);font-size:0.95rem;margin:0 0 6px;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:2.1rem;line-height:1.15;margin:0 0 10px;color:var(--navy-deep);letter-spacing:-0.01em;}
+  .masthead p{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink-soft);font-size:0.98rem;line-height:1.55;margin:0;max-width:52ch;}
+  form{background:#fff;border:1px solid var(--rule);padding:36px clamp(20px,5vw,44px) 40px;}
+  fieldset{border:none;padding:0;margin:0 0 30px;}
+  fieldset + fieldset{border-top:1px solid var(--rule);padding-top:28px;}
+  legend{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:600;font-size:0.78rem;letter-spacing:0.04em;color:var(--gold);padding:0;margin-bottom:18px;}
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  label{display:block;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.92rem;font-weight:600;color:var(--navy-deep);margin-bottom:7px;}
+  label .req{color:var(--error);font-weight:400;}
+  input[type="text"],input[type="email"],select,textarea{
+    width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.98rem;color:var(--ink);
+    background:var(--paper);border:1px solid var(--rule);padding:11px 13px;transition:border-color .15s ease, background .15s ease;
+  }
+  input[type="text"]:focus,input[type="email"]:focus,select:focus,textarea:focus{
+    outline:none;border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(27,42,74,0.10);
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+  textarea{resize:vertical;min-height:96px;line-height:1.5;}
+  .radio-row{display:flex;gap:22px;flex-wrap:wrap;padding-top:2px;}
+  .radio-option{display:flex;align-items:center;gap:7px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.95rem;}
+  .radio-option input{width:16px;height:16px;accent-color:var(--navy);}
+  .counter{display:flex;justify-content:flex-end;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.78rem;color:var(--ink-soft);margin-top:5px;}
+  .counter.limit{color:var(--error);font-weight:600;}
+  .error-msg{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--error);font-size:0.83rem;margin-top:6px;display:none;}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--error);background:#FBF2F0;}
+  .field.invalid .error-msg{display:block;}
+  .submit-row{margin-top:32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  button[type="submit"]{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:600;font-size:0.95rem;
+    background:var(--navy);color:var(--paper);border:1px solid var(--navy);padding:13px 30px;cursor:pointer;
+    transition:background .15s ease, transform .1s ease;display:inline-flex;align-items:center;gap:10px;
+  }
+  button[type="submit"]:hover{background:var(--navy-deep);}
+  button[type="submit"]:active{transform:translateY(1px);}
+  button[type="submit"]:disabled{opacity:0.7;cursor:not-allowed;}
+  .spinner{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid rgba(247,245,239,0.4);border-top-color:var(--paper);
+    animation:spin .7s linear infinite;display:none;
+  }
+  button[type="submit"].loading .spinner{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .status-line{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.85rem;color:var(--ink-soft);}
+  .banner{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.9rem;
+    padding:13px 16px;border-left:4px solid transparent;margin-bottom:22px;display:none;
+  }
+  .banner.show{display:block;}
+  .banner.success{background:#EFF6F1;border-left-color:var(--success);color:#204A38;}
+  .banner.error{background:#FBF2F0;border-left-color:var(--error);color:#7A281E;}
+  .thankyou{display:none;background:#fff;border:1px solid var(--rule);border-left:4px solid var(--success);padding:34px clamp(20px,5vw,44px);text-align:left;}
+  .thankyou.show{display:block;}
+  .thankyou h2{font-family:Georgia,serif;color:var(--navy-deep);margin:0 0 10px;font-size:1.5rem;}
+  .thankyou p{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink-soft);line-height:1.6;margin:0 0 18px;max-width:48ch;}
+  .thankyou button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:600;font-size:0.88rem;background:none;border:1px solid var(--navy);color:var(--navy-deep);padding:10px 20px;cursor:pointer;}
+  .thankyou button:hover{background:var(--navy);color:var(--paper);}
+  form.hide{display:none;}
+  .config-note{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:0.78rem;color:var(--ink-soft);
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--rule);
+  }
+  .config-note code{background:var(--paper);padding:2px 5px;font-size:0.78rem;}
+  @media (max-width:480px){
+    body{padding:28px 14px 60px;}
+    .masthead h1{font-size:1.7rem;}
+    form, .thankyou{padding:26px 18px 30px;}
+    .radio-row{gap:14px;}
+    .submit-row{flex-direction:column;align-items:stretch;}
+    button[type="submit"]{width:100%;justify-content:center;}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;}.spinner{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="kicker">Global Study Pathways &mdash; Admissions Office</p>
+    <h1>Tell us where you'd like to study</h1>
+    <p>This version posts your details live to our automation workflow via fetch() &mdash; no page reload, real-time status below.</p>
+  </div>
+
+  <div class="banner" id="banner" role="alert"></div>
+
+  <form id="leadForm" novalidate>
+
+    <fieldset>
+      <legend>About you</legend>
+
+      <div class="field" data-field="fullName">
+        <label for="fullName">Full name <span class="req">*</span></label>
+        <input type="text" id="fullName" name="fullName" autocomplete="name" />
+        <p class="error-msg">Enter your full name (at least 2 characters).</p>
+      </div>
+
+      <div class="field" data-field="email">
+        <label for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" autocomplete="email" />
+        <p class="error-msg">Enter a valid email address, like name@example.com.</p>
+      </div>
+
+      <div class="field" data-field="country">
+        <label for="country">Country of residence <span class="req">*</span></label>
+        <select id="country" name="country">
+          <option value="">Select your country</option>
+          <option value="IN">India</option>
+          <option value="US">United States</option>
+          <option value="GB">United Kingdom</option>
+          <option value="CA">Canada</option>
+          <option value="AU">Australia</option>
+          <option value="DE">Germany</option>
+          <option value="AE">United Arab Emirates</option>
+          <option value="SG">Singapore</option>
+          <option value="OTHER">Other</option>
+        </select>
+        <p class="error-msg">Select a country.</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your programme</legend>
+
+      <div class="field" data-field="courseLevel">
+        <label>Course level <span class="req">*</span></label>
+        <div class="radio-row">
+          <span class="radio-option">
+            <input type="radio" id="levelUG" name="courseLevel" value="UG" />
+            <label for="levelUG" style="margin:0;font-weight:400;">Undergraduate</label>
+          </span>
+          <span class="radio-option">
+            <input type="radio" id="levelPG" name="courseLevel" value="PG" />
+            <label for="levelPG" style="margin:0;font-weight:400;">Postgraduate</label>
+          </span>
+          <span class="radio-option">
+            <input type="radio" id="levelPhD" name="courseLevel" value="PhD" />
+            <label for="levelPhD" style="margin:0;font-weight:400;">PhD</label>
+          </span>
+        </div>
+        <p class="error-msg">Choose a course level.</p>
+      </div>
+
+      <div class="field" data-field="preferredUniversity">
+        <label for="preferredUniversity">Preferred university <span class="req">*</span></label>
+        <input type="text" id="preferredUniversity" name="preferredUniversity" placeholder="e.g. University of Toronto" />
+        <p class="error-msg">Tell us at least one university you're considering.</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Anything else</legend>
+
+      <div class="field" data-field="message">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" maxlength="300" placeholder="Questions about scholarships, intake dates, or anything on your mind..."></textarea>
+        <div class="counter" id="charCounter">300 characters remaining</div>
+        <p class="error-msg">Message can't exceed 300 characters.</p>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <button type="submit" id="submitBtn">
+        <span class="spinner"></span>
+        <span class="btnLabel">Send my details</span>
+      </button>
+      <span class="status-line">Posted live to our n8n webhook.</span>
+    </div>
+
+    <p class="config-note">
+      Webhook URL is set in <code>WEBHOOK_URL</code> near the top of the script tag below.
+      Replace it with your own n8n Production webhook URL from workflow B1 before testing.
+    </p>
+  </form>
+
+  <div class="thankyou" id="thankYou" role="status" aria-live="polite">
+    <h2>Thanks &mdash; you're on the list.</h2>
+    <p>Your details were sent to our team. A counsellor will email you shortly with universities matched to your course level and destination.</p>
+    <button type="button" id="resetBtn">Submit another response</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Replace with your own n8n webhook URL (Test or Production) from workflow B1.
+  const WEBHOOK_URL = "https://deeksha113.app.n8n.cloud/webhook-test/lead-notification";
+
+  const form = document.getElementById('leadForm');
+  const thankYou = document.getElementById('thankYou');
+  const resetBtn = document.getElementById('resetBtn');
+  const messageEl = document.getElementById('message');
+  const charCounter = document.getElementById('charCounter');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnLabel = submitBtn.querySelector('.btnLabel');
+  const banner = document.getElementById('banner');
+  const MAX_MESSAGE = 300;
+
+  function updateCounter(){
+    const remaining = MAX_MESSAGE - messageEl.value.length;
+    charCounter.textContent = remaining + ' characters remaining';
+    charCounter.classList.toggle('limit', remaining <= 20);
+  }
+  messageEl.addEventListener('input', updateCounter);
+  updateCounter();
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function setFieldError(fieldName, isValid){
+    const fieldEl = form.querySelector('[data-field="' + fieldName + '"]');
+    fieldEl.classList.toggle('invalid', !isValid);
+    return isValid;
+  }
+
+  function validate(data){
+    let valid = true;
+    if (!setFieldError('fullName', data.fullName.trim().length >= 2)) valid = false;
+    if (!setFieldError('email', EMAIL_RE.test(data.email.trim()))) valid = false;
+    if (!setFieldError('country', data.country !== '')) valid = false;
+    if (!setFieldError('courseLevel', data.courseLevel !== '')) valid = false;
+    if (!setFieldError('preferredUniversity', data.preferredUniversity.trim().length >= 2)) valid = false;
+    if (!setFieldError('message', data.message.length <= MAX_MESSAGE)) valid = false;
+    return valid;
+  }
+
+  function readForm(){
+    const fd = new FormData(form);
+    return {
+      fullName: (fd.get('fullName') || '').toString(),
+      email: (fd.get('email') || '').toString(),
+      country: (fd.get('country') || '').toString(),
+      courseLevel: (fd.get('courseLevel') || '').toString(),
+      preferredUniversity: (fd.get('preferredUniversity') || '').toString(),
+      message: (fd.get('message') || '').toString()
+    };
+  }
+
+  function showBanner(kind, text){
+    banner.textContent = text;
+    banner.className = 'banner show ' + kind;
+  }
+
+  function hideBanner(){
+    banner.className = 'banner';
+  }
+
+  function setLoading(isLoading){
+    submitBtn.disabled = isLoading;
+    submitBtn.classList.toggle('loading', isLoading);
+    btnLabel.textContent = isLoading ? 'Sending...' : 'Send my details';
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    hideBanner();
+
+    const data = readForm();
+    if (!validate(data)){
+      const firstInvalid = form.querySelector('.field.invalid input, .field.invalid select, .field.invalid textarea');
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    const payload = {
+      fullName: data.fullName.trim(),
+      email: data.email.trim(),
+      country: data.country,
+      courseLevel: data.courseLevel,
+      preferredUniversity: data.preferredUniversity.trim(),
+      message: data.message.trim(),
+      submittedAt: new Date().toISOString()
+    };
+
+    setLoading(true);
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function(response){
+        if (!response.ok){
+          throw new Error('Webhook responded with status ' + response.status);
+        }
+        return response.json().catch(function(){ return {}; });
+      })
+      .then(function(){
+        console.log('Lead sent successfully:', payload);
+        form.classList.add('hide');
+        thankYou.classList.add('show');
+      })
+      .catch(function(err){
+        console.error('Failed to send lead:', err);
+        showBanner('error', "We couldn't reach the server. Please check your connection and try again.");
+      })
+      .finally(function(){
+        setLoading(false);
+      });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    form.reset();
+    updateCounter();
+    form.querySelectorAll('.field.invalid').forEach(function(f){ f.classList.remove('invalid'); });
+    hideBanner();
+    thankYou.classList.remove('show');
+    form.classList.remove('hide');
+    document.getElementById('fullName').focus();
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+{
+  "name": "B2 - Scheduled Data Fetch Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "15262d7f-5c90-4cc4-9de4-1748f3db9f5d",
+      "name": "Cron - Daily at 9am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://universities.hipolabs.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "country",
+              "value": "India"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6c1ed51-3e1a-4c0c-bfba-bc48c643603d",
+      "name": "HTTP Request - Fetch Universities",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// HTTP Request already split the API's array into one item per university.\n// Pull every item's json, not just the first one.\nconst items = $input.all();\n\nconst cleaned = items\n  .map(i => i.json)\n  .filter(u => u.web_pages && u.web_pages.length > 0 && u['state-province'])\n  .slice(0, 25)\n  .map(u => ({\n    name: u.name,\n    country: u.country,\n    state: u['state-province'] || null,\n    domain: (u.domains && u.domains[0]) || null,\n    website: (u.web_pages && u.web_pages[0]) || null\n  }));\n\nreturn cleaned.map(item => ({ json: item }));"
+      },
+      "id": "b161a693-8b2c-44c6-a093-db6a4f3299fe",
+      "name": "Code - Filter & Transform",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "u1",
+              "name": "universityName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "u2",
+              "name": "region",
+              "value": "={{ $json.state }}",
+              "type": "string"
+            },
+            {
+              "id": "u3",
+              "name": "domain",
+              "value": "={{ $json.domain }}",
+              "type": "string"
+            },
+            {
+              "id": "u4",
+              "name": "website",
+              "value": "={{ $json.website }}",
+              "type": "string"
+            },
+            {
+              "id": "u5",
+              "name": "fetchedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "df406e45-596d-4849-a654-d78a7f54ca6b",
+      "name": "Set - Clean Labelled Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron - Daily at 9am": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Fetch Universities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Fetch Universities": {
+      "main": [
+        [
+          {
+            "node": "Code - Filter & Transform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Filter & Transform": {
+      "main": [
+        [
+          {
+            "node": "Set - Clean Labelled Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e1b91550-30be-4e99-8a08-70d9e896d493",
+  "meta": {
+    "instanceId": "ce2b2fb0467a6392242bf905ed7c6dd975eb24b2f6386bcbc6fbb109a70f32ee"
+  },
+  "nodeGroups": [],
+  "id": "3Xli5hSvryckDE2a",
+  "tags": []
+}

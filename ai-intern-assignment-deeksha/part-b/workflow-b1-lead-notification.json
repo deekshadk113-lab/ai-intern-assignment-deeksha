@@ -1,0 +1,292 @@
+{
+  "name": "B1 - Lead Notification Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-notification",
+        "options": {}
+      },
+      "id": "a22978ee-7d82-4a8c-861f-2a754357d510",
+      "name": "Webhook - Form Submit",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        336,
+        336
+      ],
+      "webhookId": "lead-notification"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "name",
+              "value": "={{ $json.body.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "courseLevel",
+              "value": "={{ $json.body.courseLevel }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "preferredUniversity",
+              "value": "={{ $json.body.preferredUniversity }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "91a7fd78-aba7-4330-8e9d-18e1ca2ed88d",
+      "name": "Set - Extract Lead Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.courseLevel }}",
+              "rightValue": "PG",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.courseLevel }}",
+              "rightValue": "PhD",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "4c17bdd6-14ea-4308-9d92-2a8c2922ed90",
+      "name": "IF - Postgraduate or PhD",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        784,
+        336
+      ],
+      "notes": "True branch (PG or PhD) -> email/Slack notification. False branch (UG) -> log to Google Sheet."
+    },
+    {
+      "parameters": {
+        "fromEmail": "dkdeeksha113@gmail.com",
+        "toEmail": "deekshadk113@gmail.com",
+        "subject": "=New {{$json.courseLevel}} lead: {{$json.name}}",
+        "emailFormat": "text",
+        "text": "=New postgraduate/PhD lead received.\n\nName: {{$json.name}}\nEmail: {{$json.email}}\nCourse level: {{$json.courseLevel}}\nPreferred university: {{$json.preferredUniversity}}\nMessage: {{$json.message}}",
+        "options": {}
+      },
+      "id": "b9a40799-8808-4c21-9954-ea3f67e32302",
+      "name": "Send Email Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        336
+      ],
+      "webhookId": "4caee60b-9e13-4cb6-add6-63ce00a88f6e",
+      "retryOnFail": false,
+      "credentials": {
+        "smtp": {
+          "id": "ezyfxpYxfxhchWd2",
+          "name": "SMTP account"
+        }
+      },
+      "notes": "Replace SMTP credentials, or swap this node for a Slack node (n8n-nodes-base.slack) if notifying via Slack instead of email."
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "126MW3XhgJgYtuKCe3tKcxPPQWMAnXb-CJeAvwXtd_SI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/126MW3XhgJgYtuKCe3tKcxPPQWMAnXb-CJeAvwXtd_SI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "email": "={{ $json.email }}",
+            "courseLevel": "={{ $json.courseLevel }}",
+            "preferredUniversity": "={{ $json.preferredUniversity }}",
+            "message": "={{ $json.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "courseLevel",
+              "displayName": "courseLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preferredUniversity",
+              "displayName": "preferredUniversity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "fb4c663f-8c65-4023-bd64-dd40dfaf85c1",
+      "name": "Google Sheets - Log Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1024,
+        560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Iq1tjlY0wZ8aq0mk",
+          "name": "Google Sheets account 2"
+        }
+      },
+      "notes": "If you don't have Google Sheets access, this can be swapped for a No-Op node (n8n-nodes-base.noOp) to mock the 'else' branch."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Form Submit": {
+      "main": [
+        [
+          {
+            "node": "Set - Extract Lead Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Extract Lead Fields": {
+      "main": [
+        [
+          {
+            "node": "IF - Postgraduate or PhD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Postgraduate or PhD": {
+      "main": [
+        [
+          {
+            "node": "Send Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets - Log Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "05ed7068-eec0-4bf2-9b45-d7531fa9b5fd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ce2b2fb0467a6392242bf905ed7c6dd975eb24b2f6386bcbc6fbb109a70f32ee"
+  },
+  "nodeGroups": [],
+  "id": "D3CPKBP4bpWhlJkD",
+  "tags": []
+}
